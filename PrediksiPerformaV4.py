@@ -322,7 +322,6 @@ if st.session_state.get("menu") == "about":
         """,
             unsafe_allow_html=True,
         )
-        st.html("employee_data_report.html")
         if st.button("Kembali ke Home"):
             st.session_state["menu"] = "home"
             st.rerun()
