@@ -1,0 +1,29 @@
+nomor_pendaftaran,int64
+nama_siswa,object
+npsn_sekolah,int64
+JK,object
+tanggal_lahir,object
+bidikmisi,object
+Sekolah,object
+Kabupaten,object
+Provinsi,object
+Pilihan 1,object
+Pilihan 2,object
+Ranking Sekolah,int64
+Nilai Mapel UN,float64
+Lulus pada Prodi,object
+Lulus Pilihan,object
+X1,float64
+X2,float64
+X3,float64
+X4,int64
+X5,float64
+X6,float64
+X7,float64
+X8,float64
+X9,float64
+XT,float64
+IP Sem 1,float64
+IP Sem 2,float64
+Predikat Semester 1,object
+Predikat Semester 2,object

@@ -1,0 +1,38 @@
+html, body, [class*="stApp"] {
+    background: linear-gradient(to bottom, #00264d, #005b96);
+    color: white;
+    font-family: "Arial", sans-serif;
+    text-align: center;
+}
+.title-container {
+    text-align: center;
+}
+
+.stButton > button {
+    background-color: white !important;
+    color: black !important;
+    padding: 10px 25px;
+    font-size: 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
+.stButton > button:hover {
+    background-color: #ddd !important;
+}
+
+.stImageContainer {
+    text-align: center;
+}
+
+.stAppHeader {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.stAppToolbar, .stMainMenu, .stAppDeployButton, .st-emotion-cache-1erivf3, .st-emotion-cache-b0y9n5 {
+    background: transparent !important;
+}
+
