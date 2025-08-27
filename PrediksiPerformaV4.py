@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import streamlit as st
+from sklearn.base import clone
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from yellowbrick.classifier import ConfusionMatrix
+from yellowbrick.classifier import ConfusionMatrix, ROCAUC
 import seaborn as sns
 
 # ---------------------------
@@ -240,7 +241,7 @@ def preprocess(df):
 # ---------------------------
 # Main app code
 # ---------------------------
-logo = "logo/PrediksiPerformaLogo.svg"
+logo = "img/Logo-Universitas-Diponegoro-UNDIP-Format-PNG-CDR-EPS-1536x1228.png"
 
 # Load custom CSS
 try:
@@ -337,7 +338,7 @@ if st.session_state.get("menu") == "upload":
             [3, 10, 15], vertical_alignment="center", gap="small"
         )
         with nav_left:
-            st.image("logo/PrediksiPerformaLogo.png")
+            st.image(logo)
         with nav_center:
             st.write("<h3>PrediksiPerforma</h3>", unsafe_allow_html=True)
         with st.container(border=True):
@@ -385,7 +386,7 @@ if st.session_state.get("menu") == "config":
             [3, 10, 15], vertical_alignment="center", gap="small"
         )
         with nav_left:
-            st.image("logo/PrediksiPerformaLogo.png")
+            st.image(logo)
         with nav_center:
             st.write("<h3>PrediksiPerforma</h3>", unsafe_allow_html=True)
         column_left, column_right = st.columns(
@@ -438,6 +439,9 @@ if st.session_state.get("menu") == "config":
                 show_cm = st.checkbox(
                     "Confusion Matrix", help="Visualisasi hasil prediksi"
                 )
+                show_rocauc = st.checkbox(
+                    "ROC-AUC Curve", help="Visualisasi ROC-AUC Curve"
+                )
                 results_file = st.checkbox(
                     "Results File", help="File dengan tambahan hasil prediksi"
                 )
@@ -455,6 +459,7 @@ if st.session_state.get("menu") == "config":
                     st.session_state["selected_models"] = selected_models
                     st.session_state["show_score"] = show_score
                     st.session_state["show_cm"] = show_cm
+                    st.session_state["show_rocauc"] = show_rocauc
                     st.session_state["results_file"] = results_file
                     st.session_state["test_size"] = test_size
                     st.session_state["menu"] = "result"
@@ -473,8 +478,8 @@ if st.session_state.get("menu") == "result":
         # Use the converted DataFrame stored in session state.
         df = st.session_state.get("df")
         x, y = preprocess(df)
-        print(x.isna().sum())
-        print(y)
+        # print(x.isna().sum())
+        # print(y)
         if x is None or y is None:
             st.error("Preprocessing failed. Cannot proceed.")
         else:
@@ -530,7 +535,7 @@ if st.session_state.get("menu") == "result":
                     [3, 10, 15], vertical_alignment="center", gap="small"
                 )
                 with nav_left:
-                    st.image("logo/PrediksiPerformaLogo.png")
+                    st.image(logo)
                 with nav_center:
                     st.write("<h3>PrediksiPerforma</h3>", unsafe_allow_html=True)
 
@@ -603,11 +608,16 @@ if st.session_state.get("menu") == "result":
                         if st.session_state.get("show_cm"):
                             try:
                                 with cm_column:
+                                    plt.clf()
                                     fig, ax = plt.subplots()
                                     cm = ConfusionMatrix(
                                         MODELS.get(model_name),
                                         classes=["0", "1", "2", "3"],
                                     )
+                                    print(len(x_train))
+                                    print(len(y_train))
+                                    print(len(x_test))
+                                    print(len(y_test))
                                     cm.fit(x_train, y_train)
                                     cm.score(x_test, y_test)
                                     outpath = f"img/{model_name}_confusion_matrix.png"
@@ -618,6 +628,21 @@ if st.session_state.get("menu") == "result":
                                     )
                             except Exception as e:
                                 st.error("Error displaying confusion matrix: " + str(e))
+                        if st.session_state.get("show_rocauc"):
+                            try:
+                                with cm_column:  # or correct container
+                                    plt.clf()
+                                    model_clone = clone(MODELS.get(model_name))
+                                    roc = ROCAUC(model_clone, classes=["0", "1", "2", "3"])
+                                    le = LabelEncoder()
+                                    y_train = le.fit_transform(y_train)
+                                    roc.fit(x_train, y_train)
+                                    roc.score(x_test, y_test)
+                                    roc_outpath = f"img/{model_name}_roc_auc.png"
+                                    roc.show(outpath=roc_outpath)
+                                    st.image(roc_outpath)
+                            except Exception as e:
+                                st.error("Error displaying ROC AUC: " + str(e))
                         if st.session_state.get("results_file"):
                             try:
                                 with results_column:
