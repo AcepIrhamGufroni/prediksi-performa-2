@@ -636,6 +636,7 @@ if st.session_state.get("menu") == "result":
                                     roc = ROCAUC(model_clone, classes=["0", "1", "2", "3"])
                                     le = LabelEncoder()
                                     y_train = le.fit_transform(y_train)
+                                    y_test = le.transform(y_test)
                                     roc.fit(x_train, y_train)
                                     roc.score(x_test, y_test)
                                     roc_outpath = f"img/{model_name}_roc_auc.png"
