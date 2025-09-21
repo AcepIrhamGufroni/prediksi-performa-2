@@ -1,0 +1,45 @@
+<style>
+.stApp { transition: background 240ms ease; text-align:center; }
+.stAppHeader { background: transparent !important; box-shadow: none !important; }
+[class*="stElementContainer element-container st-key-generate_button"] button { height: 200px; }
+.stElementContainer { width: 100%; }
+</style>
+
+<script>
+(function() {
+  const darkGradient  = 'linear-gradient(to bottom, #00264d, #005b96)';
+  const lightGradient = 'linear-gradient(to bottom, #ffa469, #ffd9b2)';
+  const appEl = document.querySelector('.stApp') || document.body;
+  if (!appEl) return;
+
+  function applyBackground(mode) {
+    if (mode === "Light") {
+      appEl.style.background = lightGradient;
+    } else {
+      // covers "Dark" and "Use system setting" (which defaults to dark in Streamlit)
+      appEl.style.background = darkGradient;
+    }
+  }
+
+  function getThemeDiv() {
+    return Array.from(document.querySelectorAll("div.st-dl"))
+      .find(el => el.textContent === "Light" || el.textContent === "Dark" || el.textContent.includes("system"));
+  }
+
+  let last = null;
+  function checkTheme() {
+    const el = getThemeDiv();
+    if (el) {
+      const val = el.textContent.trim();
+      if (val !== last) {
+        last = val;
+        applyBackground(val);
+      }
+    }
+  }
+
+  // Run once, then poll
+  checkTheme();
+  setInterval(checkTheme, 500);
+})();
+</script>

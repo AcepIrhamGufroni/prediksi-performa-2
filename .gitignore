@@ -1,0 +1,6 @@
+data/*
+!data/.gitkeep
+img/*
+!img/.gitkeep
+.mypycache/
+old_app/

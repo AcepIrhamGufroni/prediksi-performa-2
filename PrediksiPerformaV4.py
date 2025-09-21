@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import streamlit as st
+from streamlit_theme import st_theme
 from sklearn.base import clone
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 from sklearn.model_selection import train_test_split
@@ -38,7 +39,6 @@ def check_file_validity(file):
     except Exception as e:
         return False, [f"Error reading the uploaded file: {e}"]
     try:
-        # Adjust the path if necessary
         expected_dtypes = pd.read_csv(
             "data/datatypes.csv", header=None, names=["column", "dtype"]
         )
@@ -48,7 +48,6 @@ def check_file_validity(file):
     missing_columns = []
     conversion_errors = []
 
-    # For each expected column, if present, attempt to convert to the target dtype.
     for _, row in expected_dtypes.iterrows():
         col = row["column"]
         exp_dtype = row["dtype"]
@@ -124,7 +123,13 @@ def prepare_viz(df):
             lambda x: (
                 1
                 if 0 < x <= 1
-                else 2 if 1 < x <= 2 else 3 if 2 < x <= 3 else 4 if 3 < x <= 4 else 0
+                else 2
+                if 1 < x <= 2
+                else 3
+                if 2 < x <= 3
+                else 4
+                if 3 < x <= 4
+                else 0
             )
         )
         df["Lulus Pilihan"] = (
@@ -237,32 +242,53 @@ def preprocess(df):
         st.error("Error during preprocessing: " + str(e))
         return None, None
 
+def hex_to_mode(hex_color):
+    hex_color = hex_color.lstrip('#')
+
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+    brightness = (299 * r + 587 * g + 114 * b) / 1000
+
+    return "light" if brightness < 128 else "dark"
 
 # ---------------------------
 # Main app code
 # ---------------------------
 logo = "img/Logo-Universitas-Diponegoro-UNDIP-Format-PNG-CDR-EPS-1536x1228.png"
-
-# Load custom CSS
+textColor = st_theme()["textColor"]
+theme = hex_to_mode(textColor)
+if theme == "light":
+    stApp = """
+    .stApp {
+        background: linear-gradient(to bottom, #ffa469, #ffd9b2);
+        text-align: center;
+    }
+    """
+else:
+    stApp = """
+    .stApp {
+        background: linear-gradient(to bottom, #00264d, #005b96);
+        text-align: center;
+    }
+    """
 try:
+    # with open("script.html", encoding="utf-8") as f:
+    #     st.write(f.read(), unsafe_allow_html=True)
     with open("style.css", encoding="utf-8") as f:
-        st.write("<style>" + f.read() + "</style>", unsafe_allow_html=True)
+        st.write("<style>" + stApp + f.read() + "</style>", unsafe_allow_html=True)
 except Exception as e:
     st.error("Error loading style.css: " + str(e))
 
-# Initialize session state variables
 if "uploaded_file" not in st.session_state:
     st.session_state["uploaded_file"] = None
 if "df" not in st.session_state:
     st.session_state["df"] = None
 
-# In this version, we no longer re-read the file if a converted DataFrame is stored.
 if (
     st.session_state.get("uploaded_file") is not None
     and st.session_state.get("df") is None
 ):
     try:
-        # Read the file and store it (it may later be replaced with the converted DataFrame)
         st.session_state["df"] = pd.read_excel(st.session_state.get("uploaded_file"))
     except Exception as e:
         st.error("Error reading uploaded file: " + str(e))
@@ -278,7 +304,7 @@ main_container = st.empty()
 # ---------------------------
 if st.session_state["menu"] == "home":
     try:
-        nav_left, nav_center, nav_right = st.columns(3)
+        nav_left, nav_center, nav_right = st.columns([4, 5, 4])
         with nav_center:
             st.image(logo)
         st.write('<div class="title-container">', unsafe_allow_html=True)
@@ -289,12 +315,14 @@ if st.session_state["menu"] == "home":
         )
         st.write("</div>", unsafe_allow_html=True)
 
-        if st.button("Mulai"):
-            st.session_state["menu"] = "upload"
-            st.rerun()
-        if st.button("Tentang"):
-            st.session_state["menu"] = "about"
-            st.rerun()
+        nav_left, nav_center, nav_right = st.columns([6, 2, 6])
+        with nav_center:
+            if st.button("Mulai"):
+                st.session_state["menu"] = "upload"
+                st.rerun()
+            if st.button("Tentang"):
+                st.session_state["menu"] = "about"
+                st.rerun()
     except Exception as e:
         st.error("Error in home menu: " + str(e))
 
@@ -303,7 +331,7 @@ if st.session_state["menu"] == "home":
 # ---------------------------
 if st.session_state.get("menu") == "about":
     try:
-        nav_left, nav_center, nav_right = st.columns(3)
+        nav_left, nav_center, nav_right = st.columns([4, 5, 4])
         with nav_center:
             st.image(logo)
         st.write(
@@ -323,9 +351,11 @@ if st.session_state.get("menu") == "about":
         """,
             unsafe_allow_html=True,
         )
-        if st.button("Kembali ke Home"):
-            st.session_state["menu"] = "home"
-            st.rerun()
+        nav_left, nav_center, nav_right = st.columns([6, 4, 6])
+        with nav_center:
+            if st.button("Kembali ke Home"):
+                st.session_state["menu"] = "home"
+                st.rerun()
     except Exception as e:
         st.error("Error in about menu: " + str(e))
 
@@ -354,23 +384,27 @@ if st.session_state.get("menu") == "upload":
             if uploaded_file is not None:
                 st.session_state["uploaded_file"] = uploaded_file
 
-        if st.button("Process"):
-            if st.session_state.get("uploaded_file") is None:
-                st.error("No file uploaded. Please upload an Excel file.")
-            else:
-                valid, result = check_file_validity(st.session_state["uploaded_file"])
-                if valid:
-                    # Store the automatically converted DataFrame for later use.
-                    st.session_state["df"] = result
-                    st.success("File processed successfully!")
-                    st.session_state["menu"] = "config"
-                    st.rerun()
+        nav_left, nav_center, nav_right = st.columns([6, 4, 6])
+        with nav_center:
+            if st.button("Process"):
+                if st.session_state.get("uploaded_file") is None:
+                    st.error("No file uploaded. Please upload an Excel file.")
                 else:
-                    for err in result:
-                        st.error("File validation error: " + err)
-        if st.button("Kembali ke Home"):
-            st.session_state["menu"] = "home"
-            st.rerun()
+                    valid, result = check_file_validity(
+                        st.session_state["uploaded_file"]
+                    )
+                    if valid:
+                        # Store the automatically converted DataFrame for later use.
+                        st.session_state["df"] = result
+                        st.success("File processed successfully!")
+                        st.session_state["menu"] = "config"
+                        st.rerun()
+                    else:
+                        for err in result:
+                            st.error("File validation error: " + err)
+            if st.button("Kembali ke Home"):
+                st.session_state["menu"] = "home"
+                st.rerun()
     except Exception as e:
         st.error("Error during file upload process: " + str(e))
 
@@ -455,7 +489,9 @@ if st.session_state.get("menu") == "config":
             with col_right4:
                 for _ in range(6):
                     st.write("")
-                if st.button("Generate"):
+                if st.button(
+                    "Generate", key="generate_button", use_container_width=True
+                ):
                     st.session_state["selected_models"] = selected_models
                     st.session_state["show_score"] = show_score
                     st.session_state["show_cm"] = show_cm
@@ -555,13 +591,17 @@ if st.session_state.get("menu") == "result":
                 )
 
                 col_algo, col_accuracy, col_f1 = st.columns([5, 3, 5])
+                if theme == "light":
+                    color = "green"
+                else:
+                    color = "lime"
                 with col_algo:
                     st.write(
                         "<div style='text-align: justify;'><h3>Algoritma</h3></div>",
                         unsafe_allow_html=True,
                     )
                     st.write(
-                        f"<div style='text-align: justify;'><h1><span style='color:lime'>{best_model['Model']}</span></h1></div>",
+                        f"<div style='text-align: justify;'><h2><span style='color:{color}'>{best_model['Model']}</span></h2></div>",
                         unsafe_allow_html=True,
                     )
                 with col_accuracy:
@@ -570,7 +610,7 @@ if st.session_state.get("menu") == "result":
                         unsafe_allow_html=True,
                     )
                     st.write(
-                        f"<div style='text-align: justify;'><h4><span style='color:lime'>{best_model['Accuracy']:.2f}</span></h4></div>",
+                        f"<div style='text-align: justify;'><h4><span style='color:{color}'>{best_model['Accuracy']:.2f}</span></h4></div>",
                         unsafe_allow_html=True,
                     )
                 with col_f1:
@@ -579,7 +619,7 @@ if st.session_state.get("menu") == "result":
                         unsafe_allow_html=True,
                     )
                     st.write(
-                        f"<div style='text-align: justify;'><h4><span style='color:lime'>{best_model['F1 Score']:.2f}</span></h4></div>",
+                        f"<div style='text-align: justify;'><h4><span style='color:{color}'>{best_model['F1 Score']:.2f}</span></h4></div>",
                         unsafe_allow_html=True,
                     )
 
@@ -633,7 +673,9 @@ if st.session_state.get("menu") == "result":
                                 with cm_column:  # or correct container
                                     plt.clf()
                                     model_clone = clone(MODELS.get(model_name))
-                                    roc = ROCAUC(model_clone, classes=["0", "1", "2", "3"])
+                                    roc = ROCAUC(
+                                        model_clone, classes=["0", "1", "2", "3"]
+                                    )
                                     le = LabelEncoder()
                                     y_train = le.fit_transform(y_train)
                                     y_test = le.transform(y_test)
