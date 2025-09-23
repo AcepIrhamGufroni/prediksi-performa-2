@@ -304,7 +304,7 @@ main_container = st.empty()
 # ---------------------------
 if st.session_state["menu"] == "home":
     try:
-        nav_left, nav_center, nav_right = st.columns([4, 5, 4])
+        nav_left, nav_center, nav_right = st.columns([4, 8, 4])
         with nav_center:
             st.image(logo)
         st.write('<div class="title-container">', unsafe_allow_html=True)
