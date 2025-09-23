@@ -307,13 +307,13 @@ if st.session_state["menu"] == "home":
         nav_left, nav_center, nav_right = st.columns([4, 5, 4])
         with nav_center:
             st.image(logo)
-        # st.write('<div class="title-container">', unsafe_allow_html=True)
+        st.write('<div class="title-container">', unsafe_allow_html=True)
         st.write("<h1>PrediksiPerforma</h1>", unsafe_allow_html=True)
         st.write(
             "<h6>Prediksi Performa Akademik Mahasiswa dengan EDM Berbasis Supervised Learning Algorithm</h6>",
             unsafe_allow_html=True,
         )
-        # st.write("</div>", unsafe_allow_html=True)
+        st.write("</div>", unsafe_allow_html=True)
 
         nav_left, nav_center, nav_right = st.columns([6, 2, 6])
         with nav_center:
