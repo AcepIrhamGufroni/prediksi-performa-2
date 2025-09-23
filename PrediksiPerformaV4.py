@@ -310,7 +310,7 @@ if st.session_state["menu"] == "home":
         st.write('<div class="title-container">', unsafe_allow_html=True)
         st.write("<h1>PrediksiPerforma</h1>", unsafe_allow_html=True)
         st.write(
-            "<h5>Analisis Prediksi Performa Akademik Mahasiswa dengan Machine Learning</h5>",
+            "<h5>Prediksi Performa Akademik Mahasiswa dengan EDM Berbasis Supervised Learning Algorithm</h5>",
             unsafe_allow_html=True,
         )
         st.write("</div>", unsafe_allow_html=True)
